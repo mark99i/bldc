@@ -2067,13 +2067,14 @@ static void update_override_limits(volatile motor_if_state_t *motor, volatile mc
 
     // Battery cutoff regen (only if there are mechanical brakes)
     bool battery_regen_cutoff_enabled = true;       // TODO: move to motor_conf
-	float battery_regen_cutoff_start = motor->m_conf.si_battery_cells * 4.15;   // TODO: move to motor_conf
-    float battery_regen_cutoff_end = motor->m_conf.si_battery_cells * 4.25;     // TODO: move to motor_conf
+	float battery_regen_cutoff_start = conf->si_battery_ah * 4.15;   // TODO: move to motor_conf
+    float battery_regen_cutoff_end = conf->si_battery_ah * 4.25;     // TODO: move to motor_conf
 
     float lo_in_min_batt = conf->l_in_current_min;
     if (battery_regen_cutoff_enabled && v_in > battery_regen_cutoff_start) {
         lo_in_min_batt = utils_map(v_in, battery_regen_cutoff_start,
-                                   battery_regen_cutoff_end, conf->l_in_current_min, 0.0);
+                                   battery_regen_cutoff_end,
+                                   conf->l_in_current_min, 0.0);
 
         if (lo_in_min_batt > 0) lo_in_min_batt = 0;
     }
@@ -2083,13 +2084,13 @@ static void update_override_limits(volatile motor_if_state_t *motor, volatile mc
 	const float lo_in_min_watt = conf->l_watt_min / v_in;
 
 	float lo_in_max = utils_min_abs(lo_in_max_watt, lo_in_max_batt);
-	float lo_in_min = utils_max_abs(lo_in_min_watt, lo_in_min_batt);
+    float lo_in_min = utils_min_abs(lo_in_min_watt, lo_in_min_batt);
 
 	// BMS limits
 	bms_update_limits(&lo_in_min,  &lo_in_max, conf->l_in_current_min, conf->l_in_current_max);
 
 	conf->lo_in_current_max = utils_min_abs(conf->l_in_current_max, lo_in_max);
-	conf->lo_in_current_min = utils_min_abs(conf->l_in_current_min, lo_in_min);
+	conf->lo_in_current_min = utils_min_abs(conf->lo_in_current_min, lo_in_min);
 
 	// Maximum current right now
 //	float duty_abs = fabsf(mc_interface_get_duty_cycle_now());
