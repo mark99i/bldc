@@ -34,6 +34,7 @@
 #define MIN_MS_WITHOUT_POWER			500
 #define FILTER_SAMPLES					5
 #define RPM_FILTER_SAMPLES				8
+#define TC_DIFF_MAX_PASS				60  // TODO: move to app_conf
 
 // Threads
 static THD_FUNCTION(adc_thread, arg);
@@ -527,7 +528,8 @@ static THD_FUNCTION(adc_thread, arg) {
 
 
 				// Traction control
-                int tc_diff_pass = 60; // TODO: move to app_conf
+
+                int tc_diff_pass = TC_DIFF_MAX_PASS;
 
 				if (config.multi_esc) {
 					for (int i = 0;i < CAN_STATUS_MSGS_TO_STORE;i++) {

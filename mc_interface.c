@@ -2067,16 +2067,19 @@ static void update_override_limits(volatile motor_if_state_t *motor, volatile mc
 
     // Battery cutoff regen (only if there are mechanical brakes)
     bool battery_regen_cutoff_enabled = true;       // TODO: move to motor_conf
-	float battery_regen_cutoff_start = conf->si_battery_ah * 4.15;   // TODO: move to motor_conf
-    float battery_regen_cutoff_end = conf->si_battery_ah * 4.25;     // TODO: move to motor_conf
+	float battery_regen_cutoff_start = conf->si_battery_cells * 4.19;   // TODO: move to motor_conf
+    float battery_regen_cutoff_end = conf->si_battery_cells * 4.3;      // TODO: move to motor_conf
 
     float lo_in_min_batt = conf->l_in_current_min;
     if (battery_regen_cutoff_enabled && v_in > battery_regen_cutoff_start) {
-        lo_in_min_batt = utils_map(v_in, battery_regen_cutoff_start,
-                                   battery_regen_cutoff_end,
-                                   conf->l_in_current_min, 0.0);
 
-        if (lo_in_min_batt > 0) lo_in_min_batt = 0;
+        if (v_in > battery_regen_cutoff_end) {
+            lo_in_min_batt = -1.0;
+        } else {
+            lo_in_min_batt = utils_map(v_in, battery_regen_cutoff_start,
+                                       battery_regen_cutoff_end,
+                                       conf->l_in_current_min, -1.0);
+        }
     }
 
 	// Wattage limits
